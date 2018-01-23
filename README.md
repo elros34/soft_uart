@@ -1,6 +1,6 @@
 # soft_uart
 
-Software-based serial port module for Raspberry Pi.
+Software-based serial port module.
 
 This module creates a software-based serial port using a configurable pair of GPIO pins. The serial port will appear as `/dev/ttySOFT0`.
 
@@ -21,18 +21,8 @@ Fetch the source:
 git clone https://github.com/adrianomarto/soft_uart
 ```
 
-Install the package `raspberrypi-kernel-headers`:
-```
-sudo apt-get install raspberrypi-kernel-headers
-```
+Install kernel headers
 
-Edit the file `raspberry_gpio.c` to set the correct value for BCM2708_BASE, according to the version of the Raspberry Pi you are using.
-```
-// For Raspberry Pi v2 and v3:
-#define BCM2708_BASE  0x3f000000
-
-//For Raspberry Pi v1:
-#define BCM2708_BASE  0x20000000
 
 ```
 
@@ -83,7 +73,6 @@ echo "hello" > /dev/ttySOFT0
 ## Baud rate
 
 When choosing the baud rate, take into account that:
-* The Raspberry Pi is not very fast.
 * You will probably not be running a real-time operating system.
 * There will be other processes competing for CPU time.
 

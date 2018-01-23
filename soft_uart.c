@@ -1,5 +1,5 @@
 
-#include "raspberry_soft_uart.h"
+#include "soft_uart.h"
 #include "queue.h"
 
 #include <linux/gpio.h> 
@@ -26,7 +26,7 @@ static int gpio_rx = 0;
 static int rx_bit_index = -1;
 
 /**
- * Initializes the Raspberry Soft UART infrastructure.
+ * Initializes the Soft UART infrastructure.
  * This must be called during the module initialization.
  * The GPIO pin used as TX is configured as output.
  * The GPIO pin used as RX is configured as input.
@@ -34,7 +34,7 @@ static int rx_bit_index = -1;
  * @param gpio_rx GPIO pin used as RX
  * @return 1 if the initialization is successful. 0 otherwise.
  */
-int raspberry_soft_uart_init(const int _gpio_tx, const int _gpio_rx)
+int soft_uart_init(const int _gpio_tx, const int _gpio_rx)
 {
   bool success = true;
   
@@ -71,9 +71,9 @@ int raspberry_soft_uart_init(const int _gpio_tx, const int _gpio_rx)
 }
 
 /**
- * Finalizes the Raspberry Soft UART infrastructure.
+ * Finalizes the Soft UART infrastructure.
  */
-int raspberry_soft_uart_finalize(void)
+int soft_uart_finalize(void)
 {
   free_irq(gpio_to_irq(gpio_rx), NULL);
   gpio_set_value(gpio_tx, 0);
@@ -87,7 +87,7 @@ int raspberry_soft_uart_finalize(void)
  * @param tty
  * @return 1 if the operation is successful. 0 otherwise.
  */
-int raspberry_soft_uart_open(struct tty_struct* tty)
+int soft_uart_open(struct tty_struct* tty)
 {
   int success = 0;
   mutex_lock(&current_tty_mutex);
@@ -105,7 +105,7 @@ int raspberry_soft_uart_open(struct tty_struct* tty)
 /**
  * Closes the Soft UART.
  */
-int raspberry_soft_uart_close(void)
+int soft_uart_close(void)
 {
   int success = 0;
   mutex_lock(&current_tty_mutex);
@@ -126,7 +126,7 @@ int raspberry_soft_uart_close(void)
  * @param baudrate desired baudrate
  * @return 1 if the operation is successful. 0 otherwise.
  */
-int raspberry_soft_uart_set_baudrate(const int baudrate) 
+int soft_uart_set_baudrate(const int baudrate) 
 {
   period = ktime_set(0, 1000000000/baudrate);
   gpio_set_debounce(gpio_rx, 1000/baudrate/2);
@@ -139,7 +139,7 @@ int raspberry_soft_uart_set_baudrate(const int baudrate)
  * @param string_size size of the given string
  * @return The amount of characters successfully added to the queue.
  */
-int raspberry_soft_uart_send_string(const unsigned char* string, int string_size)
+int soft_uart_send_string(const unsigned char* string, int string_size)
 {
   int result = enqueue_string(&queue_tx, string, string_size);
   
@@ -156,7 +156,7 @@ int raspberry_soft_uart_send_string(const unsigned char* string, int string_size
  * Gets the number of characters that can be added to the TX queue.
  * @return number of characters.
  */
-int raspberry_soft_uart_get_tx_queue_room(void)
+int soft_uart_get_tx_queue_room(void)
 {
   return get_queue_room(&queue_tx);
 }
@@ -165,7 +165,7 @@ int raspberry_soft_uart_get_tx_queue_room(void)
  * Gets the number of characters in the TX queue.
  * @return number of characters.
  */
-int raspberry_soft_uart_get_tx_queue_size(void)
+int soft_uart_get_tx_queue_size(void)
 {
   return get_queue_size(&queue_tx);
 }
