@@ -1,5 +1,5 @@
 
-#include "raspberry_soft_uart.h"
+#include "soft_uart.h"
 
 #include <linux/delay.h>
 #include <linux/module.h>
@@ -14,7 +14,7 @@
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Adriano Marto Reis");
-MODULE_DESCRIPTION("Software-UART for Raspberry Pi");
+MODULE_DESCRIPTION("Software-UART");
 MODULE_VERSION("0.1");
 
 static int gpio_tx = 17;
@@ -73,7 +73,7 @@ static int __init soft_uart_init(void)
 {
   printk(KERN_INFO "soft_uart: Initializing module...\n");
   
-  if (!raspberry_soft_uart_init(gpio_tx, gpio_rx))
+  if (!soft_uart_init(gpio_tx, gpio_rx))
   {
     printk(KERN_ALERT "soft_uart: Failed initialize GPIO.\n");
     return -ENOMEM;
@@ -151,7 +151,7 @@ static void __exit soft_uart_exit(void)
   printk(KERN_INFO "soft_uart: Finalizing the module...\n");
   
   // Finalizes the soft UART.
-  if (!raspberry_soft_uart_finalize())
+  if (!soft_uart_finalize())
   {
     printk(KERN_ALERT "soft_uart: Something went wrong whilst finalizing the soft UART.\n");
   }
@@ -176,7 +176,7 @@ static int soft_uart_open(struct tty_struct* tty, struct file* file)
 {
   int error = NONE;
     
-  if (raspberry_soft_uart_open(tty))
+  if (soft_uart_open(tty))
   {
     printk(KERN_INFO "soft_uart: Device opened.\n");
   }
@@ -198,14 +198,14 @@ static void soft_uart_close(struct tty_struct* tty, struct file* file)
 {
   // Waits for the TX buffer to be empty before closing the UART.
   int wait_time = 0;
-  while ((raspberry_soft_uart_get_tx_queue_size() > 0)
+  while ((soft_uart_get_tx_queue_size() > 0)
     && (wait_time < TX_BUFFER_FLUSH_TIMEOUT))
   {
     msleep(100);
     wait_time += 100;
   }
   
-  if (raspberry_soft_uart_close())
+  if (soft_uart_close())
   {
     printk(KERN_INFO "soft_uart: Device closed.\n");
   }
@@ -224,7 +224,7 @@ static void soft_uart_close(struct tty_struct* tty, struct file* file)
  */
 static int soft_uart_write(struct tty_struct* tty, const unsigned char* buffer, int buffer_size)
 {
-  return raspberry_soft_uart_send_string(buffer, buffer_size);
+  return soft_uart_send_string(buffer, buffer_size);
 }
 
 /**
@@ -234,7 +234,7 @@ static int soft_uart_write(struct tty_struct* tty, const unsigned char* buffer, 
  */
 static int soft_uart_write_room(struct tty_struct* tty)
 {
-  return raspberry_soft_uart_get_tx_queue_room();
+  return soft_uart_get_tx_queue_room();
 }
 
 /**
@@ -252,7 +252,7 @@ static void soft_uart_flush_buffer(struct tty_struct* tty)
  */
 static int soft_uart_chars_in_buffer(struct tty_struct* tty)
 {
-  return raspberry_soft_uart_get_tx_queue_size();
+  return soft_uart_get_tx_queue_size();
 }
 
 /**
@@ -292,7 +292,7 @@ static void soft_uart_set_termios(struct tty_struct* tty, struct ktermios* termi
   }
   
   // Configure the baudrate.
-  if (!raspberry_soft_uart_set_baudrate(baudrate))
+  if (!soft_uart_set_baudrate(baudrate))
   {
     printk(KERN_ALERT "soft_uart: Invalid baudrate.\n");
   }
